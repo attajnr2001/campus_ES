@@ -1,0 +1,39 @@
+.widget {
+  display: grid;
+  gap: 0.5em;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.dashboard {
+  width: 95%;
+  margin: 1em auto;
+}
+.pageLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  box-shadow: 0 0 2px #808080a4;
+  border-radius: 0.3em;
+}
+
+.text {
+  text-align: left;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.icon {
+  text-align: right;
+}
+
+.pageLink .MuiButtonBase-root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
