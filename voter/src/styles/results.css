@@ -1,0 +1,17 @@
+.results {
+  width: 95%;
+  position: relative;
+  top: 5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart{
+  height: 100vh; 
+}
+
+.recharts-legend-item-text, .recharts-legend-icon{
+  display: none;
+}

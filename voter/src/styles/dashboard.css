@@ -1,0 +1,67 @@
+.dashboard {
+  width: 95%;
+  margin: 1em auto;
+  position: relative;
+}
+
+.candidate-groups {
+  height: 90vh;
+  /* overflow-y: hidden; */
+}
+
+.candidate-group {
+  height: 100%;
+  display: flex;
+  flex-direction: column; /* Change direction to column */
+  justify-content: center;
+  align-items: center;
+}
+
+.buttons {
+  position: fixed; /* Change position to fixed */
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+}
+
+.selected img {
+  border: 4px solid #080bd480; /* Add a border around the selected image */
+  box-shadow: 0 0 10px #080bd480; /* Add a shadow effect to the selected image */
+  border-radius: 0.3em;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Add transition effect */
+  transform: scale(1.1);
+  margin-bottom: 1em; 
+}
+
+.selected .contents {
+  transition: transform 0.3s ease; /* Add transition effect */
+}
+
+.selected .contents:hover {
+  transform: scale(1.05); /* Example: Increase size on hover */
+}
+
+.no-flex {
+  display: flex;
+  gap: 2em;
+  margin-top: 1em;
+}
+
+.no-flex li {
+  list-style-type: none;
+}
+
+li .contents {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.no-flex img {
+  height: 330px;
+  width: 200px;
+}
+.buttons button {
+  margin: 0 10px;
+}
