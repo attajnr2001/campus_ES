@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import PageLink from "../components/PageLink";
 import { TaskAlt, HowToReg, VerifiedUser } from "@mui/icons-material";
 import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 
 const Dashboard = () => {
   const [totalVoters, setTotalVoters] = useState(0);
@@ -12,39 +12,29 @@ const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
-    const fetchTotalVoters = async () => {
-      try {
-        const votersCollection = collection(db, "voters");
-        const votersSnapshot = await getDocs(votersCollection);
-        setTotalVoters(votersSnapshot.size);
-      } catch (error) {
-        console.error("Error fetching total voters:", error);
+    const unsubscribeVoters = onSnapshot(
+      collection(db, "voters"),
+      (snapshot) => {
+        setTotalVoters(snapshot.size);
       }
-    };
+    );
 
-    const fetchTotalCandidates = async () => {
-      try {
-        const candidatesCollection = collection(db, "candidates");
-        const candidatesSnapshot = await getDocs(candidatesCollection);
-        setTotalCandidates(candidatesSnapshot.size);
-      } catch (error) {
-        console.error("Error fetching total candidates:", error);
+    const unsubscribeCandidates = onSnapshot(
+      collection(db, "candidates"),
+      (snapshot) => {
+        setTotalCandidates(snapshot.size);
       }
-    };
+    );
 
-    const fetchTotalUsers = async () => {
-      try {
-        const usersCollection = collection(db, "users");
-        const usersSnapshot = await getDocs(usersCollection);
-        setTotalUsers(usersSnapshot.size);
-      } catch (error) {
-        console.error("Error fetching total users:", error);
-      }
-    };
+    const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+      setTotalUsers(snapshot.size);
+    });
 
-    fetchTotalVoters();
-    fetchTotalCandidates();
-    fetchTotalUsers();
+    return () => {
+      unsubscribeVoters();
+      unsubscribeCandidates();
+      unsubscribeUsers();
+    };
   }, []);
 
   return (

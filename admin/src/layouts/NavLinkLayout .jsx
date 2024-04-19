@@ -1,7 +1,7 @@
 import "../styles/navLinkLayout.css";
 import { Outlet, NavLink } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
-import DriveEtaIcon from "@mui/icons-material/DriveEta";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { AccountBox } from "@mui/icons-material";
 
 const NavLinkLayout = () => {
@@ -13,7 +13,7 @@ const NavLinkLayout = () => {
         </NavLink>
 
         <NavLink to="candidates" className="navLink">
-          <DriveEtaIcon />
+          <AccountCircleIcon />
         </NavLink>
 
         <NavLink to="users" className="navLink">

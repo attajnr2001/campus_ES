@@ -13,9 +13,14 @@ import {
   CircularProgress,
   Paper,
   Avatar,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const CandidatesList = () => {
@@ -24,6 +29,9 @@ const CandidatesList = () => {
   const [candidates, setCandidates] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [openConfirmation, setOpenConfirmation] = useState(false);
 
   const fetchClients = async () => {
     try {
@@ -54,20 +62,69 @@ const CandidatesList = () => {
     setPage(0);
   };
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleDeleteCandidate = async (candidateId) => {
+    try {
+      await deleteDoc(doc(db, "candidates", candidateId));
+      // Remove the deleted candidate from the state
+      setCandidates(
+        candidates.filter((candidate) => candidate.id !== candidateId)
+      );
+    } catch (error) {
+      console.error("Error deleting candidate:", error);
+    }
+  };
+
+  const handleDeleteAllCandidates = async () => {
+    try {
+      const candidatesCollection = collection(db, "candidates");
+      const querySnapshot = await getDocs(candidatesCollection);
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+      setOpenConfirmation(false);
+      fetchClients();
+    } catch (error) {
+      console.error("Error deleting all candidates:", error);
+    }
+  };
+
+  const handleOpenConfirmation = () => {
+    setOpenConfirmation(true);
+  };
+
+  const handleCloseConfirmation = () => {
+    setOpenConfirmation(false);
+  };
+
   return (
     <div className="client">
       <div className="header">
         <Typography variant="h6" gutterBottom>
           All Candidates
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          component={Link}
-          to="add-candidate"
-        >
-          +
-        </Button>
+
+        <div className="buttons">
+          <Button
+            variant="outlined"
+            color="primary"
+            component={Link}
+            to="add-candidate"
+          >
+            +
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            sx={{ marginLeft: "1em" }}
+            onClick={handleOpenConfirmation}
+          >
+            -
+          </Button>
+        </div>
       </div>
       {loading ? (
         <CircularProgress style={{ margin: "20px" }} />
@@ -108,14 +165,12 @@ const CandidatesList = () => {
                       {candidate.status}
                     </TableCell>
                     <TableCell>
-                      {/* Add an edit button that links to the edit-candidate page */}
                       <Button
                         variant="outlined"
-                        color="primary"
-                        component={Link}
-                        to={`edit-candidate/${candidate.id}`}
+                        color="error"
+                        onClick={() => handleDeleteCandidate(candidate.id)}
                       >
-                        Edit
+                        Delete
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -133,6 +188,29 @@ const CandidatesList = () => {
           />
         </TableContainer>
       )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      />
+
+      <Dialog open={openConfirmation} onClose={handleCloseConfirmation}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete all candidates?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmation} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteAllCandidates} color="error">
+            Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

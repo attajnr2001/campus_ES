@@ -13,9 +13,19 @@ import {
   CircularProgress,
   Paper,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 const VotersList = () => {
@@ -24,6 +34,7 @@ const VotersList = () => {
   const [voters, setVoters] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [openConfirmation, setOpenConfirmation] = useState(false);
 
   const fetchVoters = async () => {
     try {
@@ -54,20 +65,63 @@ const VotersList = () => {
     setPage(0);
   };
 
+  const handleEditStatus = async (voterId, currentStatus) => {
+    try {
+      const voterDocRef = doc(db, "voters", voterId);
+      const newStatus = currentStatus === "Active" ? "InActive" : "Active";
+      await updateDoc(voterDocRef, { status: newStatus });
+      fetchVoters();
+    } catch (error) {
+      console.error("Error updating voter status:", error);
+    }
+  };
+
+  const handleOpenConfirmation = () => {
+    setOpenConfirmation(true);
+  };
+
+  const handleCloseConfirmation = () => {
+    setOpenConfirmation(false);
+  };
+
+  const handleDeleteAllVoters = async () => {
+    try {
+      const votersCollection = collection(db, "voters");
+      const querySnapshot = await getDocs(votersCollection);
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+      setOpenConfirmation(false);
+      fetchVoters();
+    } catch (error) {
+      console.error("Error deleting all voters:", error);
+    }
+  };
+
   return (
     <div className="client">
       <div className="header">
         <Typography variant="h6" gutterBottom>
           All Voters
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          component={Link}
-          to="add-voter"
-        >
-          +
-        </Button>
+        <div className="buttons">
+          <Button
+            variant="outlined"
+            color="primary"
+            component={Link}
+            to="add-voter"
+          >
+            +
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            sx={{ marginLeft: "1em" }}
+            onClick={handleOpenConfirmation}
+          >
+            -
+          </Button>
+        </div>
       </div>
       {loading ? (
         <CircularProgress style={{ margin: "20px" }} />
@@ -87,8 +141,7 @@ const VotersList = () => {
                 <TableCell>Index</TableCell>
                 <TableCell>Has Voted</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Edit</TableCell>{" "}
-                {/* Add a new TableCell for Edit button */}
+                <TableCell>Edit</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -106,12 +159,10 @@ const VotersList = () => {
                       {voter.status}
                     </TableCell>
                     <TableCell>
-                      {/* Add an edit button that links to the edit-voter page */}
                       <Button
                         variant="outlined"
                         color="primary"
-                        component={Link}
-                        to={`edit-voter/${voter.id}`}
+                        onClick={() => handleEditStatus(voter.id, voter.status)}
                       >
                         Edit
                       </Button>
@@ -131,6 +182,20 @@ const VotersList = () => {
           />
         </TableContainer>
       )}
+      <Dialog open={openConfirmation} onClose={handleCloseConfirmation}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete all voters?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmation} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteAllVoters} color="error">
+            Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
